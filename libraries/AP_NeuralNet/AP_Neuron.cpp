@@ -3,6 +3,8 @@
 #include "AP_Neuron.h"
 #include "../AP_HAL/AP_HAL.h"
 
+#include <math.h>
+
 
 
 const AP_HAL::HAL& hal = AP_HAL::get_HAL(); //TODO: change to hardware call
@@ -41,6 +43,18 @@ void Neuron::feedForward(const Layer &prevLayer) {
         }
     }
 
-    m_output = /*trasnfer Funtion()*/sum;
+    m_output = Neuron::transferFunction(sum);
 
+}
+
+double Neuron::transferFunction(double sum){
+    // using hyperbolic tangent function scaled to [-1.0...1.0]
+    // using from math.h for now, can convert to approximation routine as well if needed for performance
+    return tanh(sum);
+}
+
+double Neuron::transferFunctionDerivative(double sum){
+    // tanh derivitive - d/dx of tanh(x)
+   // using approximation here
+    return 1.0 - sum * sum;
 }

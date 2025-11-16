@@ -37,6 +37,9 @@ private:
 
     VectorN<Connection, MAX_NEURONS> m_outputWeights;
 
+    static double transferFunction(double sum);
+    static double transferFunctionDerivative(double sum);
+
 };
 
 
