@@ -13,9 +13,9 @@ TEST(AP_NEURAL_NET, nn_test)
     // number of layers and number of neurons in each layer,
     // i.e. 3-2-1  input layer has 3 neurons, 1 hidden has 2 neurons and output layer has 1 neuron.
     VectorN<unsigned,NUM_LAYERS> topology;
-    topology[0] = NUM_NEURONS_LAYER_ONE;
-    topology[1] = NUM_NEURONS_LAYER_TWO;
-    topology[2] = NUM_NEURONS_LAYER_THREE;
+    topology[0] = NUM_NEURONS_INPUT_LAYER;
+    topology[1] = NUM_NEURONS_LAYER_ONE;
+    topology[2] = NUM_NEURONS_OUTPUT_LAYER;
     Net nNet(topology);
 
 

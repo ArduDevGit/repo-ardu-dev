@@ -3,7 +3,7 @@
 #include "AP_Neuron.h"
 #include "../AP_HAL/AP_HAL.h"
 
-#include <math.h>
+#include <cmath>
 
 
 
@@ -50,7 +50,7 @@ void Neuron::feedForward(const Layer &prevLayer) {
 double Neuron::transferFunction(double sum){
     // using hyperbolic tangent function scaled to [-1.0...1.0]
     // using from math.h for now, can convert to approximation routine as well if needed for performance
-    return tanh(sum);
+    return std::tanh(sum);
 }
 
 double Neuron::transferFunctionDerivative(double sum){

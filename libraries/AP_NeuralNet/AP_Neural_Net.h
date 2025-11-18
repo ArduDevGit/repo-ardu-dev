@@ -15,7 +15,7 @@
 #pragma once
 
 //https://vimeo.com/19569529
-//42min
+//47min
 
 #include "AP_Neuron.h"
 #include <AP_Math/vectorN.h>
@@ -39,6 +39,8 @@ private:
     void displayActiveNeurons() const;
 
     VectorN<unsigned,NUM_LAYERS> m_topology;
+
+    float m_error;
 
 };
 
