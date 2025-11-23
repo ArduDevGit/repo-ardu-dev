@@ -67,7 +67,8 @@ void Net::backPropagate(const VectorN<float,NUM_INPUTS> &targets)
     m_recentAverageError =
         (m_recentAverageError * m_recentAverageSmoothingFactor + m_error) / (m_recentAverageSmoothingFactor + 1.0);
 
-    // calculate output layer gradients for each output neuron (compute how much its output contributed to the error).
+    // calculate output layer gradients for each output neuron,
+    // meaning compute how much that neuron contributed to the overall error.
     for (unsigned neuron = 0; neuron < NUM_NEURONS_OUTPUT_LAYER - 1; ++neuron) {
         outputLayer[neuron].calcOutputGradients(targets[neuron]);
     }

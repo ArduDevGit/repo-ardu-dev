@@ -47,14 +47,31 @@ void Neuron::feedForward(const Layer &prevLayer) {
 
 }
 
-double Neuron::transferFunction(double sum){
+float Neuron::transferFunction(float sum) {
     // using hyperbolic tangent function scaled to [-1.0...1.0]
     // using from math.h for now, can convert to approximation routine as well if needed for performance
     return std::tanh(sum);
 }
 
-double Neuron::transferFunctionDerivative(double sum){
+float Neuron::transferFunctionDerivative(float output) {
     // tanh derivitive - d/dx of tanh(x)
-   // using approximation here
-    return 1.0 - sum * sum;
+    // using approximation here
+    return 1.0 - output * output;
+}
+
+void Neuron::calcOutputGradients(float targetVal) {
+    // how far off was this neurons output
+    float delta = targetVal - m_output;
+
+    // the final "blame score" for this neuron (error size * "sensitivity")
+    // The gradient is saying this neuron is off by this much,
+    // and here’s how strongly we should adjust weights.
+    m_gradient = delta * Neuron::transferFunctionDerivative(m_output);
+}
+
+void Neuron::calcHiddenGradient(const Layer &nextHiddenLayer) {
+    //TODO
+}
+void Neuron::updateInputWeights(const Layer &prevLayer) {
+    //TODO
 }

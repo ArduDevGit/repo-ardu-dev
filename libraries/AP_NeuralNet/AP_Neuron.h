@@ -30,15 +30,20 @@ public:
 
     void feedForward(const Layer &prevLayer);
 
+    void calcOutputGradients(float targetVal);
+    void calcHiddenGradient(const Layer &nextHiddenLayer);
+    void updateInputWeights(const Layer &prevLayer);
+
 private:
     bool activated;
     float m_output;
     unsigned m_myIndex;
+    float m_gradient;
 
     VectorN<Connection, MAX_NEURONS> m_outputWeights;
 
-    static double transferFunction(double sum);
-    static double transferFunctionDerivative(double sum);
+    static float transferFunction(float sum);
+    static float transferFunctionDerivative(float output);
 
 };
 
