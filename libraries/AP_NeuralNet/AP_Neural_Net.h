@@ -15,7 +15,7 @@
 #pragma once
 
 //https://vimeo.com/19569529
-//47min
+//50min
 
 #include "AP_Neuron.h"
 #include <AP_Math/vectorN.h>
@@ -41,6 +41,9 @@ private:
     VectorN<unsigned,NUM_LAYERS> m_topology;
 
     float m_error;
+
+    float m_recentAverageError;
+    float m_recentAverageSmoothingFactor;
 
 };
 
