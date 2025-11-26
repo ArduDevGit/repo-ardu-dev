@@ -6,8 +6,14 @@
 #include <cmath>
 
 
-
 const AP_HAL::HAL& hal = AP_HAL::get_HAL(); //TODO: change to hardware call
+
+// Tuning parameters - these are consistent for all neurons
+float Neuron::eta = 0.15; // overall net learning rate [0.0,1.0]
+float Neuron::alpha = 0.5; // momentum - multiplier of the last weight change [0.0,n]
+
+
+
 
 Neuron::Neuron() {
     activated = false;
@@ -26,14 +32,16 @@ void Neuron::activate(unsigned numOutputs, unsigned myIndex) {
     for (unsigned connection = 0; connection < numOutputs; ++connection) {
         m_outputWeights[connection].activated = true;
         hal.util->get_random_vals(&randomVal,1);
-        m_outputWeights[connection].weight = randomVal / static_cast<float>(UINT32_MAX);
+        // scale weight between [0.0,1.0], will need to reevaluate for turbulence detection input.
+        m_outputWeights[connection].weight = randomVal / static_cast<float>(UINT8_MAX);
+        // can use static_cast<float>(UINT8_MAX)) * 2.0f - 1.0f; for [-0.5,0.5]
     }
 
 }
 
 void Neuron::feedForward(const Layer &prevLayer) {
 
-    double sum = 0.0;
+    float sum = 0.0;
 
     // This neurons inputs =
     // sum of previous layers output nodes (include bias node) * the weight intended for this node
@@ -47,6 +55,8 @@ void Neuron::feedForward(const Layer &prevLayer) {
 
 }
 
+// will need to reevaluate transfer functions to see if will still work for turbulence detection input.
+// may want ReLU or leaky ReLU.
 float Neuron::transferFunction(float sum) {
     // using hyperbolic tangent function scaled to [-1.0...1.0]
     // using from math.h for now, can convert to approximation routine as well if needed for performance
@@ -59,6 +69,7 @@ float Neuron::transferFunctionDerivative(float output) {
     return 1.0 - output * output;
 }
 
+// gradient a.k.a. error signal
 void Neuron::calcOutputGradients(float targetVal) {
     // how far off was this neurons output
     float delta = targetVal - m_output;
@@ -69,9 +80,39 @@ void Neuron::calcOutputGradients(float targetVal) {
     m_gradient = delta * Neuron::transferFunctionDerivative(m_output);
 }
 
-void Neuron::calcHiddenGradient(const Layer &nextHiddenLayer) {
-    //TODO
+// sum of errors weighted by connection strength, from the errors in the next layer.
+float Neuron::sumDOW(const Layer &nextHiddenLayer) const {
+    float sum = 0.0;
+
+    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) {
+        if (nextHiddenLayer[n].activated) {
+            // sum the weight from our neuron to the other neuron we feed
+            sum += m_outputWeights[n].weight * nextHiddenLayer[n].m_gradient;
+        }
+    }
+    return sum;
 }
-void Neuron::updateInputWeights(const Layer &prevLayer) {
-    //TODO
+
+void Neuron::calcHiddenGradient(const Layer &nextHiddenLayer) {
+
+    float dow = sumDOW(nextHiddenLayer);
+    m_gradient = dow * Neuron::transferFunctionDerivative(m_output);
+}
+
+void Neuron::updateInputWeights( Layer &prevLayer) {
+
+    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) {
+        if (prevLayer[n].activated) {
+            Neuron &neuron = prevLayer[n];
+            float oldDeltaWeight = m_outputWeights[m_myIndex].deltaWeight;
+
+            float newDeltaWeight =
+                // learning rate * prev neuron output * our neurons gradient + (momentum * old change in weight)
+                eta * neuron.getOutputVal() * m_gradient + alpha * oldDeltaWeight;
+
+            // update the neurons weight it is storing for me (this neuron)
+            neuron.m_outputWeights[m_myIndex].deltaWeight = newDeltaWeight;
+            neuron.m_outputWeights[m_myIndex].weight += newDeltaWeight;
+        }
+    }
 }

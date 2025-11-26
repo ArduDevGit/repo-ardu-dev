@@ -16,7 +16,6 @@ struct Connection {
     bool activated;
 };
 
-
 class Neuron {
 
 public:
@@ -32,7 +31,7 @@ public:
 
     void calcOutputGradients(float targetVal);
     void calcHiddenGradient(const Layer &nextHiddenLayer);
-    void updateInputWeights(const Layer &prevLayer);
+    void updateInputWeights(Layer &prevLayer);
 
 private:
     bool activated;
@@ -40,10 +39,16 @@ private:
     unsigned m_myIndex;
     float m_gradient;
 
+    // these are consistent for all neurons
+    static float eta; // overall net learning rate [0.0,1.0]
+    static float alpha; // momentum - multiplier of the last weight change [0.0,n]
+
     VectorN<Connection, MAX_NEURONS> m_outputWeights;
 
     static float transferFunction(float sum);
     static float transferFunctionDerivative(float output);
+
+    float sumDOW(const Layer &nextHiddenLayer) const;
 
 };
 

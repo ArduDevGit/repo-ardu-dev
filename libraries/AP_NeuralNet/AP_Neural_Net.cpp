@@ -60,7 +60,7 @@ void Net::backPropagate(const VectorN<float,NUM_INPUTS> &targets)
     }
 
     // get average error (divide by number of elements that we summed for the average)
-    m_error = m_error / NUM_NEURONS_OUTPUT_LAYER - 1;
+    m_error = m_error / (NUM_NEURONS_OUTPUT_LAYER - 1);
     m_error = std::sqrt(m_error);
 
     // debug: recent average measurement:
@@ -73,7 +73,7 @@ void Net::backPropagate(const VectorN<float,NUM_INPUTS> &targets)
         outputLayer[neuron].calcOutputGradients(targets[neuron]);
     }
 
-    // calculate gradients on hidden layers
+    // calculate how much hidden layer neurons contributed to the overall error.
     for (unsigned layerNum = NUM_LAYERS - 2; layerNum > 0; --layerNum) {
         Layer &currentHiddenLayer = m_layers[layerNum];
         Layer &nextHiddenLayer = m_layers[layerNum+1];
