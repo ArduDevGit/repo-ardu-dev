@@ -11,14 +11,19 @@ Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topology(topology)
 
     for (unsigned layerNum = 0; layerNum < NUM_LAYERS; ++layerNum) {
 
-        // number of outputs a neuron will need to feed the next layer (except for the output/last layer).
+        // create/activate neurons in this layer
         unsigned numOutputs = layerNum == (NUM_LAYERS-1) ? 0 : topology[layerNum+1];
 
         // fill (activate) each layer with the number of neurons specified
         for (unsigned neuroNum = 0; neuroNum < topology[layerNum]; ++neuroNum) {
             assert(topology[layerNum] <= MAX_NEURONS);
+            // pass in number of outputs the neuron will need to feed the next layer (except the output/last layer).
             m_layers[layerNum][neuroNum].activate(numOutputs, neuroNum);
         }
+
+        // Force last neuron in layer to 1.0 - the bias neuron
+        unsigned neuronsInLayer = topology[layerNum];
+        m_layers[layerNum][neuronsInLayer-1].setOutputVal(1.0);
     }
 
     displayActiveNeurons(); //TODO: remove debug
@@ -99,9 +104,11 @@ void Net::backPropagate(const VectorN<float,NUM_INPUTS> &targets)
 
 }
 
-void Net::getResults(VectorN<float,NUM_INPUTS> &results) const
+void Net::getResults(VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &results) const
 {
-
+    for (unsigned n = 0; n < NUM_NEURONS_OUTPUT_LAYER - 1; ++n) {
+        results[n] = m_layers[NUM_LAYERS-1][n].getOutputVal();
+    }
 }
 
 //TODO: send to console

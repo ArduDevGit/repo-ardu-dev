@@ -31,7 +31,7 @@ TEST(AP_NEURAL_NET, nn_test)
     // feed forward real data
     // TBD
     //get results
-    VectorN<float,NUM_INPUTS> results;
+    VectorN<float, NUM_NEURONS_OUTPUT_LAYER> results {};
     nNet.getResults(results);
 
 

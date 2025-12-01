@@ -39,7 +39,7 @@ private:
     unsigned m_myIndex;
     float m_gradient;
 
-    // these are consistent for all neurons
+    // eta and aplha are consistent for all neurons
     static float eta; // overall net learning rate [0.0,1.0]
     static float alpha; // momentum - multiplier of the last weight change [0.0,n]
 

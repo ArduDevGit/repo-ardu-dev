@@ -15,7 +15,7 @@
 #pragma once
 
 //https://vimeo.com/19569529
-//58min
+
 
 #include "AP_Neuron.h"
 #include <AP_Math/vectorN.h>
@@ -30,7 +30,7 @@ public:
 
     void feedForward(const VectorN<float,NUM_INPUTS> &inputs);
     void backPropagate(const VectorN<float,NUM_INPUTS> &targets);
-    void getResults(VectorN<float,NUM_INPUTS> &results) const;
+    void getResults(VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &results) const;
 
 
 
