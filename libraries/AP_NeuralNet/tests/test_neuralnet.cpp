@@ -24,7 +24,7 @@ TEST(AP_NEURAL_NET, nn_test)
     nNet.feedForward(inputs);
 
     // tell it the answers for backpropagation
-    VectorN<float,NUM_INPUTS> targets;
+    VectorN<float,NUM_NEURONS_OUTPUT_LAYER> targets;
     nNet.backPropagate(targets);
 
     // operation after training

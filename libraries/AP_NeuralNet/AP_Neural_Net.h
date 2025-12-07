@@ -21,18 +21,14 @@
 #include <AP_Math/vectorN.h>
 
 
-
-
 class Net {
 
 public:
     explicit Net(const VectorN<unsigned,NUM_LAYERS> &topology);
 
     void feedForward(const VectorN<float,NUM_INPUTS> &inputs);
-    void backPropagate(const VectorN<float,NUM_INPUTS> &targets);
+    void backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets);
     void getResults(VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &results) const;
-
-
 
 private:
     VectorN<Layer, NUM_LAYERS> m_layers; // i.e. vector of vector [layer][neuronNum]
@@ -44,6 +40,5 @@ private:
 
     float m_recentAverageError;
     float m_recentAverageSmoothingFactor;
-
 };
 

@@ -23,10 +23,20 @@ Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topology(topology)
 
         // Force last neuron in layer to 1.0 - the bias neuron
         unsigned neuronsInLayer = topology[layerNum];
-        m_layers[layerNum][neuronsInLayer-1].setOutputVal(1.0);
+        if (neuronsInLayer > 0) {
+            m_layers[layerNum][neuronsInLayer-1].setOutputVal(1.0);
+        }
     }
 
+
     displayActiveNeurons(); //TODO: remove debug
+    // init variables
+    m_error = 0.0;
+    m_recentAverageError = 0.0;
+    m_recentAverageSmoothingFactor = 0.0;
+
+    // TODO: Save how many number of neurons are active in each layer so we can use that instead of MAX_NEURONS
+    // and then an activate check as it could be wasteful with larger nets.
 
 }
 
@@ -42,6 +52,7 @@ void Net::feedForward(const VectorN<float,NUM_INPUTS> &inputs)
 
         Layer &prevLayer = m_layers[layerNum-1];
 
+        // Loop to MAX_NEURONS; inactive neurons are skipped (avoids passing topology to the routine).
         for (unsigned n = 0; n < MAX_NEURONS; ++n) {
             if (m_layers[layerNum][n].isActivated()) {
                 m_layers[layerNum][n].feedForward(prevLayer); // give a reference to previous layer only
@@ -53,7 +64,7 @@ void Net::feedForward(const VectorN<float,NUM_INPUTS> &inputs)
 // The learning algorithm for the neural net.
 // It adjusts the weights of the connections between neurons
 // so that the network’s outputs get closer to the desired targets.
-void Net::backPropagate(const VectorN<float,NUM_INPUTS> &targets)
+void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
 {
     // calculate overall net error (Root Mean Square Error - RMS), compare current outputs to target given
     Layer &outputLayer = m_layers[NUM_LAYERS-1];
@@ -65,7 +76,7 @@ void Net::backPropagate(const VectorN<float,NUM_INPUTS> &targets)
     }
 
     // get average error (divide by number of elements that we summed for the average)
-    m_error = m_error / (NUM_NEURONS_OUTPUT_LAYER - 1);
+    m_error = m_error / (NUM_NEURONS_OUTPUT_LAYER - 1); // exclude bias neuron
     m_error = std::sqrt(m_error);
 
     // debug: recent average measurement:
