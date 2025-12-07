@@ -14,15 +14,15 @@ using namespace std;
 
 TEST(AP_NEURAL_NET, nn_generate_data)
 {
-    cout << "random training sets for XOR -- two inputs and one output" << endl;
+    cout << "Random training data for XOR (two inputs and one output)" << endl;
 
     // Open a file for writing
-    ofstream myfile("/home/gs/CLionProjects/repo-ardu-dev/libraries/AP_NeuralNet/tests/trainingData.txt");
+    ofstream myfile("libraries/AP_NeuralNet/tests/trainingData.txt");
 
-    myfile << "topology: 4 3 2" << endl;
-    for (int i = 2000; i >= 0; --i) {
-        int n1 = static_cast<int>(2.0 * rand() / static_cast<double>(RAND_MAX));
-        int n2 = static_cast<int>(2.0 * rand() / static_cast<double>(RAND_MAX));
+    myfile << "topology: 2 3 1" << endl;
+    for (int i = 0; i < 2000; ++i) {
+        int n1 = rand() % 2;
+        int n2 = rand() % 2;
         int t = n1 ^ n2; // should be 0 or 1
         myfile << "in: " << n1 << ".0 " << n2 << ".0 " << endl;
         myfile << "out: " << t << ".0" << endl;
