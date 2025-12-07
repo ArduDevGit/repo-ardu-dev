@@ -19,6 +19,7 @@ Neuron::Neuron() {
     activated = false;
     m_output = 0;
     m_myIndex = 0;
+    m_gradient = 0.0;
 
 }
 
@@ -31,10 +32,11 @@ void Neuron::activate(unsigned numOutputs, unsigned myIndex) {
     // init/activate output to each node in next layer, with a random weight
     for (unsigned connection = 0; connection < numOutputs; ++connection) {
         m_outputWeights[connection].activated = true;
+        m_outputWeights[connection].deltaWeight = 0.0;
+
         hal.util->get_random_vals(&randomVal,1);
-        // scale weight between [0.0,1.0], will need to reevaluate for turbulence detection input.
-        m_outputWeights[connection].weight = randomVal / static_cast<float>(UINT8_MAX);
-        // can use static_cast<float>(UINT8_MAX)) * 2.0f - 1.0f; for [-0.5,0.5]
+        // scale weight between [-0.5, +0.5]
+        m_outputWeights[connection].weight = (randomVal / static_cast<float>(UINT8_MAX)) - 0.5f;
     }
 
 }
@@ -84,7 +86,8 @@ void Neuron::calcOutputGradients(float targetVal) {
 float Neuron::sumDOW(const Layer &nextHiddenLayer) const {
     float sum = 0.0;
 
-    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) {
+    //TODO: this is not going to work when num activated is less, need to keep track of num activated in each
+    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) { // exclude bias neuron
         if (nextHiddenLayer[n].activated) {
             // sum the weight from our neuron to the other neuron we feed
             sum += m_outputWeights[n].weight * nextHiddenLayer[n].m_gradient;
@@ -101,7 +104,8 @@ void Neuron::calcHiddenGradient(const Layer &nextHiddenLayer) {
 
 void Neuron::updateInputWeights( Layer &prevLayer) {
 
-    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) {
+    //TODO: this is not going to work when num activated is less, need to keep track of num activated in each
+    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) { // exclude bias neuron
         if (prevLayer[n].activated) {
             Neuron &neuron = prevLayer[n];
             float oldDeltaWeight = m_outputWeights[m_myIndex].deltaWeight;
