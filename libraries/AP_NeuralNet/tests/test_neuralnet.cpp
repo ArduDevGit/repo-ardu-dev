@@ -3,12 +3,38 @@
 #include <iostream>
 #include <AP_gtest.h>
 #include <AP_NeuralNet/AP_Neural_Net.h>
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
 
+
+
+
+using namespace std;
+
+TEST(AP_NEURAL_NET, nn_generate_data)
+{
+    cout << "random training sets for XOR -- two inputs and one output" << endl;
+
+    // Open a file for writing
+    ofstream myfile("/home/gs/CLionProjects/repo-ardu-dev/libraries/AP_NeuralNet/tests/trainingData.txt");
+
+    myfile << "topology: 4 3 2" << endl;
+    for (int i = 2000; i >= 0; --i) {
+        int n1 = static_cast<int>(2.0 * rand() / static_cast<double>(RAND_MAX));
+        int n2 = static_cast<int>(2.0 * rand() / static_cast<double>(RAND_MAX));
+        int t = n1 ^ n2; // should be 0 or 1
+        myfile << "in: " << n1 << ".0 " << n2 << ".0 " << endl;
+        myfile << "out: " << t << ".0" << endl;
+    }
+    // Close the file
+    myfile.close();
+}
 
 
 TEST(AP_NEURAL_NET, nn_test)
 {
-    std::cout << "START NET TEST" << std::endl;
+    cout << "START NET TEST" << endl;
 
     // number of layers and number of neurons in each layer,
     // i.e. 3-2-1  input layer has 3 neurons, 1 hidden has 2 neurons and output layer has 1 neuron.
@@ -35,7 +61,7 @@ TEST(AP_NEURAL_NET, nn_test)
     nNet.getResults(results);
 
 
-    std::cout << "END NET TEST" << std::endl;
+    cout << "END NET TEST" << endl;
 }
 
 AP_GTEST_MAIN()
