@@ -1,16 +1,17 @@
 
 
-#include <iostream>
+
 #include <AP_gtest.h>
 #include <AP_NeuralNet/AP_Neural_Net.h>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
-
-
+#include <iostream>
 
 
 using namespace std;
+
+
 
 TEST(AP_NEURAL_NET, nn_generate_data)
 {
@@ -30,6 +31,7 @@ TEST(AP_NEURAL_NET, nn_generate_data)
     // Close the file
     myfile.close();
 }
+
 
 
 TEST(AP_NEURAL_NET, nn_test)

@@ -34,7 +34,7 @@ private:
     VectorN<Layer, NUM_LAYERS> m_layers; // i.e. vector of vector [layer][neuronNum]
     void displayActiveNeurons() const;
 
-    VectorN<unsigned,NUM_LAYERS> m_topology;
+    VectorN<unsigned,NUM_LAYERS> m_topologyNumNeurons;
 
     float m_error;
 

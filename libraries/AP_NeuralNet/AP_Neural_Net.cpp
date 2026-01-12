@@ -6,22 +6,23 @@
 #include <iostream> //TODO: change to console
 #include <cmath>
 
-Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topology(topology)
+Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topologyNumNeurons(topology)
 {
 
     for (unsigned layerNum = 0; layerNum < NUM_LAYERS; ++layerNum) {
 
-        // create/activate neurons in this layer
+        // grab number of outputs from the "layer forward"
         unsigned numOutputs = layerNum == (NUM_LAYERS-1) ? 0 : topology[layerNum+1];
 
-        // fill (activate) each layer with the number of neurons specified
+        // create/activate neurons in this layer
+        // fill (activate) each layer with the number of neurons specified by topology
         for (unsigned neuroNum = 0; neuroNum < topology[layerNum]; ++neuroNum) {
             assert(topology[layerNum] <= MAX_NEURONS);
             // pass in number of outputs the neuron will need to feed the next layer (except the output/last layer).
             m_layers[layerNum][neuroNum].activate(numOutputs, neuroNum);
         }
 
-        // Force last neuron in layer to 1.0 - the bias neuron
+        // Force last neuron for this iteration/layer to 1.0 - the bias neuron
         unsigned neuronsInLayer = topology[layerNum];
         if (neuronsInLayer > 0) {
             m_layers[layerNum][neuronsInLayer-1].setOutputVal(1.0);
@@ -34,9 +35,6 @@ Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topology(topology)
     m_error = 0.0;
     m_recentAverageError = 0.0;
     m_recentAverageSmoothingFactor = 0.0;
-
-    // TODO: Save how many number of neurons are active in each layer so we can use that instead of MAX_NEURONS
-    // and then an activate check as it could be wasteful with larger nets.
 
 }
 
@@ -52,11 +50,9 @@ void Net::feedForward(const VectorN<float,NUM_INPUTS> &inputs)
 
         Layer &prevLayer = m_layers[layerNum-1];
 
-        // Loop to MAX_NEURONS; inactive neurons are skipped (avoids passing topology to the routine).
-        for (unsigned n = 0; n < MAX_NEURONS; ++n) {
-            if (m_layers[layerNum][n].isActivated()) {
-                m_layers[layerNum][n].feedForward(prevLayer); // give a reference to previous layer only
-            }
+        // Loop through number of neurons active in this layer
+        for (unsigned n = 0; n < m_topologyNumNeurons[layerNum]; ++n) {
+            m_layers[layerNum][n].feedForward(prevLayer); // give a reference to previous layer only
         }
     }
 }
@@ -94,10 +90,8 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
         Layer &currentHiddenLayer = m_layers[layerNum];
         Layer &nextHiddenLayer = m_layers[layerNum+1];
 
-        for (unsigned neuron = 0; neuron < MAX_NEURONS; ++neuron) {
-            if (currentHiddenLayer[neuron].isActivated()) {
+        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum]; ++neuron) {
                 currentHiddenLayer[neuron].calcHiddenGradient(nextHiddenLayer);
-            }
         }
     }
 
@@ -106,10 +100,8 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
         Layer &layer = m_layers[layerNum];
         Layer &prevLayer = m_layers[layerNum-1];
 
-        for (unsigned neuron = 0; neuron < MAX_NEURONS; ++neuron) {
-            if (layer[neuron].isActivated()) {
+        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum]; ++neuron) {
                 layer[neuron].updateInputWeights(prevLayer);
-            }
         }
     }
 
@@ -127,10 +119,8 @@ void Net::displayActiveNeurons() const {
 
     std::cout << "ACTIVE NEURONS: " << std::endl;
     for (unsigned layerNum = 0; layerNum < NUM_LAYERS; ++layerNum) {
-        for (unsigned neuroNum = 0; neuroNum < m_topology[layerNum]; ++neuroNum) {
-            if (m_layers[layerNum][neuroNum].isActivated()) {
+        for (unsigned neuroNum = 0; neuroNum < m_topologyNumNeurons[layerNum]; ++neuroNum) {
                 std::cout << "  LAYER: " << layerNum << " NEURON: " << neuroNum << " ACTIVATED" << std::endl;
-            }
         }
     }
 
