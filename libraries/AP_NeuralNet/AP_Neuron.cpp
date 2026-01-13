@@ -84,7 +84,6 @@ void Neuron::calcOutputGradients(float targetVal) {
 float Neuron::sumDOW(const Layer &nextHiddenLayer, unsigned numActiveNextLayer) const {
     float sum = 0.0;
 
-    //TODO: this is not going to work when num activated is less, need to keep track of num activated in each
     for (unsigned n = 0; n < numActiveNextLayer - 1; ++n) { // exclude bias neuron
             // sum the weight from our neuron to the other neuron we feed
             sum += m_outputWeights[n].weight * nextHiddenLayer[n].m_gradient;
