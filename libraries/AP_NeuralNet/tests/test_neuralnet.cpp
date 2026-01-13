@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "support/TrainingDataHelper.h"
+
 
 using namespace std;
 
@@ -20,7 +22,9 @@ TEST(AP_NEURAL_NET, nn_generate_data)
     // Open a file for writing
     ofstream myfile("libraries/AP_NeuralNet/tests/trainingData.txt");
 
-    myfile << "topology: 2 3 1" << endl;
+    // needs to match structure of net in AP_Neural_Config.h
+    myfile << "topology: 4 3 2" << endl;
+
     for (int i = 0; i < 2000; ++i) {
         int n1 = rand() % 2;
         int n2 = rand() % 2;
@@ -33,7 +37,71 @@ TEST(AP_NEURAL_NET, nn_generate_data)
 }
 
 
+void showVectorVals(string label, vector<double>& v);
 
+TEST(AP_NEURAL_NET, nn_test)
+{
+    cout << "START NET TEST" << endl;
+
+    TrainingData trainData("rainingData.txt");
+
+
+    // set the topology
+    VectorN<unsigned,NUM_LAYERS> topology;
+    trainData.getTopology(topology);
+
+    //setup net structure with the topology
+    Net myNet(topology);
+
+    VectorN<float,NUM_INPUTS> inputVals;
+    VectorN<float,NUM_NEURONS_OUTPUT_LAYER> resultVals;
+    VectorN<float,NUM_NEURONS_OUTPUT_LAYER> targetvals;
+    int trainingPass = 0;
+
+    while (!trainData.isEof())
+    {
+        ++trainingPass;
+        cout << endl << "Pass " << trainingPass;
+
+        // get new input data and feet it forward
+        if (trainData.getNextInputs(inputVals) != topology[0])
+        {
+            break;
+        }
+        showVectorVals(": inputs:", inputVals);
+        myNet.feedForward(inputVals);
+
+        // collect the nets actual results:
+        myNet.getResults(resultVals);
+        showVectorVals("Outputs:", resultVals);
+
+        // train the net what the outputs should have been
+        trainData.getTargetOutputs(targetvals);
+        showVectorVals("Targets:", targetvals);
+        assert(targetvals.size() == topology.back());
+
+        myNet.backProp(targetvals);
+
+        //report how well the training is working, averaged
+        cout << "Net recent average error: " << myNet.getRecentAverageError() << endl;
+
+    }
+
+    cout << "END NET TEST" << endl;
+}
+
+void showVectorVals(string label, vector<double>& v)
+{
+    cout << label << " ";
+    for (unsigned i = 0; i < v.size(); ++i) {
+        cout << v[i] << " ";
+    }
+
+    cout << endl;
+}
+
+
+/* OLD TEST
 TEST(AP_NEURAL_NET, nn_test)
 {
     cout << "START NET TEST" << endl;
@@ -65,5 +133,5 @@ TEST(AP_NEURAL_NET, nn_test)
 
     cout << "END NET TEST" << endl;
 }
-
+*/
 AP_GTEST_MAIN()
