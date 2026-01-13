@@ -49,10 +49,11 @@ void Net::feedForward(const VectorN<float,NUM_INPUTS> &inputs)
     for (unsigned layerNum = 1; layerNum < NUM_LAYERS; ++layerNum) {
 
         Layer &prevLayer = m_layers[layerNum-1];
+        unsigned numActivePrevLayer = m_topologyNumNeurons[layerNum-1];
 
         // Loop through number of neurons active in this layer
         for (unsigned n = 0; n < m_topologyNumNeurons[layerNum]; ++n) {
-            m_layers[layerNum][n].feedForward(prevLayer); // give a reference to previous layer only
+            m_layers[layerNum][n].feedForward(prevLayer,numActivePrevLayer); // give a reference to previous layer only
         }
     }
 }
@@ -89,9 +90,10 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
     for (unsigned layerNum = NUM_LAYERS - 2; layerNum > 0; --layerNum) {
         Layer &currentHiddenLayer = m_layers[layerNum];
         Layer &nextHiddenLayer = m_layers[layerNum+1];
+        unsigned numActiveNextLayer = m_topologyNumNeurons[layerNum+1];
 
-        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum]; ++neuron) {
-                currentHiddenLayer[neuron].calcHiddenGradient(nextHiddenLayer);
+        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum] - 1; ++neuron) {
+                currentHiddenLayer[neuron].calcHiddenGradient(nextHiddenLayer,numActiveNextLayer);
         }
     }
 
@@ -99,9 +101,10 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
     for (unsigned layerNum = NUM_LAYERS - 1; layerNum > 0; --layerNum) {
         Layer &layer = m_layers[layerNum];
         Layer &prevLayer = m_layers[layerNum-1];
+        unsigned numActivePrevLayer = m_topologyNumNeurons[layerNum-1];
 
-        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum]; ++neuron) {
-                layer[neuron].updateInputWeights(prevLayer);
+        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum] - 1; ++neuron) {
+                layer[neuron].updateInputWeights(prevLayer,numActivePrevLayer);
         }
     }
 

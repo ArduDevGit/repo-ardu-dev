@@ -41,16 +41,14 @@ void Neuron::activate(unsigned numOutputs, unsigned myIndex) {
 
 }
 
-void Neuron::feedForward(const Layer &prevLayer) {
+void Neuron::feedForward(const Layer &prevLayer, unsigned numActivePrevLayer) {
 
     float sum = 0.0;
 
     // This neurons inputs =
     // sum of previous layers output nodes (include bias node) * the weight intended for this node
-    for (unsigned n = 0; n < MAX_NEURONS; ++n) {
-        if (prevLayer[n].activated) {
+    for (unsigned n = 0; n < numActivePrevLayer; ++n) {
             sum += prevLayer[n].getOutputVal() * prevLayer[n].m_outputWeights[m_myIndex].weight;
-        }
     }
 
     m_output = Neuron::transferFunction(sum);
@@ -83,30 +81,26 @@ void Neuron::calcOutputGradients(float targetVal) {
 }
 
 // sum of errors weighted by connection strength, from the errors in the next layer.
-float Neuron::sumDOW(const Layer &nextHiddenLayer) const {
+float Neuron::sumDOW(const Layer &nextHiddenLayer, unsigned numActiveNextLayer) const {
     float sum = 0.0;
 
     //TODO: this is not going to work when num activated is less, need to keep track of num activated in each
-    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) { // exclude bias neuron
-        if (nextHiddenLayer[n].activated) {
+    for (unsigned n = 0; n < numActiveNextLayer - 1; ++n) { // exclude bias neuron
             // sum the weight from our neuron to the other neuron we feed
             sum += m_outputWeights[n].weight * nextHiddenLayer[n].m_gradient;
-        }
     }
     return sum;
 }
 
-void Neuron::calcHiddenGradient(const Layer &nextHiddenLayer) {
+void Neuron::calcHiddenGradient(const Layer &nextHiddenLayer, unsigned numActiveNextLayer) {
 
-    float dow = sumDOW(nextHiddenLayer);
+    float dow = sumDOW(nextHiddenLayer,numActiveNextLayer);
     m_gradient = dow * Neuron::transferFunctionDerivative(m_output);
 }
 
-void Neuron::updateInputWeights( Layer &prevLayer) {
+void Neuron::updateInputWeights(Layer &prevLayer, unsigned numActivePrevLayer) {
 
-    //TODO: this is not going to work when num activated is less, need to keep track of num activated in each
-    for (unsigned n = 0; n < MAX_NEURONS - 1; ++n) { // exclude bias neuron
-        if (prevLayer[n].activated) {
+    for (unsigned n = 0; n < numActivePrevLayer; ++n) {
             Neuron &neuron = prevLayer[n];
             float oldDeltaWeight = m_outputWeights[m_myIndex].deltaWeight;
 
@@ -117,6 +111,5 @@ void Neuron::updateInputWeights( Layer &prevLayer) {
             // update the neurons weight it is storing for me (this neuron)
             neuron.m_outputWeights[m_myIndex].deltaWeight = newDeltaWeight;
             neuron.m_outputWeights[m_myIndex].weight += newDeltaWeight;
-        }
     }
 }

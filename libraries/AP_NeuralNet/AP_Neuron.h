@@ -27,11 +27,11 @@ public:
     void setOutputVal(float val) { m_output = val; }
     float getOutputVal() const { return m_output; }
 
-    void feedForward(const Layer &prevLayer);
+    void feedForward(const Layer &prevLayer, unsigned numActivePrevLayer);
 
     void calcOutputGradients(float targetVal);
-    void calcHiddenGradient(const Layer &nextHiddenLayer);
-    void updateInputWeights(Layer &prevLayer);
+    void calcHiddenGradient(const Layer &nextHiddenLayer, unsigned numActiveNextLayer);
+    void updateInputWeights(Layer &prevLayer, unsigned numActivePrevLayer);
 
 private:
     bool activated;
@@ -48,7 +48,7 @@ private:
     static float transferFunction(float sum);
     static float transferFunctionDerivative(float output);
 
-    float sumDOW(const Layer &nextHiddenLayer) const;
+    float sumDOW(const Layer &nextHiddenLayer, unsigned numActiveNextLayer) const;
 
 };
 
