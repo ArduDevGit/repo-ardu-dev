@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "support/TrainingDataHelper.h"
+#include "../TrainingDataHelper.h"
 
 
 using namespace std;
@@ -19,31 +19,37 @@ TEST(AP_NEURAL_NET, nn_generate_data)
 {
     cout << "Random training data for XOR (two inputs and one output)" << endl;
 
-    // Open a file for writing
     ofstream myfile("libraries/AP_NeuralNet/tests/trainingData.txt");
 
-    // needs to match structure of net in AP_Neural_Config.h
-    myfile << "topology: 4 3 2" << endl;
+    myfile << "topology: 3 3 1" << endl;
+
+    srand(time(NULL));
 
     for (int i = 0; i < 2000; ++i) {
         int n1 = rand() % 2;
         int n2 = rand() % 2;
-        int t = n1 ^ n2; // should be 0 or 1
-        myfile << "in: " << n1 << ".0 " << n2 << ".0 " << endl;
-        myfile << "out: " << t << ".0" << endl;
+
+        // XOR target in [-1, +1]
+        int xorVal = n1 ^ n2;
+        float t = xorVal ? 1.0f : -1.0f;
+
+        myfile << "in: " << n1 << ".0 " << n2 << ".0" << endl;
+        myfile << "out: " << t << endl;
     }
-    // Close the file
+
     myfile.close();
 }
 
 
-void showVectorVals(string label, vector<double>& v);
+
+void showVectorVals(string label, VectorN<float,NUM_NEURONS_OUTPUT_LAYER>& v);
+void showVectorValsInputs(string label, VectorN<float,NUM_INPUTS>& v);
 
 TEST(AP_NEURAL_NET, nn_test)
 {
     cout << "START NET TEST" << endl;
 
-    TrainingData trainData("rainingData.txt");
+    TrainingData trainData;
 
 
     // set the topology
@@ -64,11 +70,11 @@ TEST(AP_NEURAL_NET, nn_test)
         cout << endl << "Pass " << trainingPass;
 
         // get new input data and feet it forward
-        if (trainData.getNextInputs(inputVals) != topology[0])
+        if (trainData.getNextInputs(inputVals) != (topology[0] - 1))
         {
             break;
         }
-        showVectorVals(": inputs:", inputVals);
+        showVectorValsInputs(": inputs:", inputVals);
         myNet.feedForward(inputVals);
 
         // collect the nets actual results:
@@ -78,22 +84,32 @@ TEST(AP_NEURAL_NET, nn_test)
         // train the net what the outputs should have been
         trainData.getTargetOutputs(targetvals);
         showVectorVals("Targets:", targetvals);
-        assert(targetvals.size() == topology.back());
+        //assert(targetvals.size() == topology.back());
 
-        myNet.backProp(targetvals);
+        myNet.backPropagate(targetvals);
 
         //report how well the training is working, averaged
         cout << "Net recent average error: " << myNet.getRecentAverageError() << endl;
 
     }
 
-    cout << "END NET TEST" << endl;
+    cout << endl << "END NET TEST" << endl;
 }
 
-void showVectorVals(string label, vector<double>& v)
+void showVectorVals(string label, VectorN<float,NUM_NEURONS_OUTPUT_LAYER>& v)
 {
     cout << label << " ";
-    for (unsigned i = 0; i < v.size(); ++i) {
+    for (unsigned i = 0; i < NUM_NEURONS_OUTPUT_LAYER; ++i) {
+        cout << v[i] << " ";
+    }
+
+    cout << endl;
+}
+
+void showVectorValsInputs(string label, VectorN<float,NUM_INPUTS>& v)
+{
+    cout << label << " ";
+    for (unsigned i = 0; i < NUM_INPUTS; ++i) {
         cout << v[i] << " ";
     }
 
