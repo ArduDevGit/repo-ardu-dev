@@ -36,7 +36,9 @@ void Neuron::activate(unsigned numOutputs, unsigned myIndex) {
 
         hal.util->get_random_vals(&randomVal,1);
         // scale weight between [-0.5, +0.5]
-        m_outputWeights[connection].weight = (randomVal / static_cast<float>(UINT8_MAX)) - 0.5f;
+        //m_outputWeights[connection].weight = (randomVal / static_cast<float>(UINT8_MAX)) - 0.5f;
+        m_outputWeights[connection].weight = (randomVal / 255.0f) * 2.0f - 1.0f;  // [-1.0, +1.0]
+
     }
 
 }
@@ -101,7 +103,7 @@ void Neuron::updateInputWeights(Layer &prevLayer, unsigned numActivePrevLayer) {
 
     for (unsigned n = 0; n < numActivePrevLayer; ++n) {
             Neuron &neuron = prevLayer[n];
-            float oldDeltaWeight = m_outputWeights[m_myIndex].deltaWeight;
+            float oldDeltaWeight = neuron.m_outputWeights[m_myIndex].deltaWeight;
 
             float newDeltaWeight =
                 // learning rate * prev neuron output * our neurons gradient + (momentum * old change in weight)
