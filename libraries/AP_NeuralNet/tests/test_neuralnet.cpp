@@ -29,12 +29,11 @@ TEST(AP_NEURAL_NET, nn_generate_data)
         int n1 = rand() % 2;
         int n2 = rand() % 2;
 
-        // XOR target in [-1, +1]
+        // XOR target in [0,1]
         int xorVal = n1 ^ n2;
-        float t = xorVal ? 1.0f : -1.0f;
 
         myfile << "in: " << n1 << ".0 " << n2 << ".0" << endl;
-        myfile << "out: " << t << endl;
+        myfile << "out: " << xorVal << endl;
     }
 
     myfile.close();
