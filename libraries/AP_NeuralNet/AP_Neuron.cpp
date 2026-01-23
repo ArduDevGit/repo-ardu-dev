@@ -35,10 +35,7 @@ void Neuron::activate(unsigned numOutputs, unsigned myIndex) {
         m_outputWeights[connection].deltaWeight = 0.0;
 
         hal.util->get_random_vals(&randomVal,1);
-        // scale weight between [-0.5, +0.5]
-        //m_outputWeights[connection].weight = (randomVal / static_cast<float>(UINT8_MAX)) - 0.5f;
-        m_outputWeights[connection].weight = (randomVal / 255.0f) * 2.0f - 1.0f;  // [-1.0, +1.0]
-
+        m_outputWeights[connection].weight = (randomVal / static_cast<float>(UINT8_MAX));
     }
 
 }
