@@ -29,6 +29,7 @@ public:
     void feedForward(const VectorN<float,NUM_INPUTS> &inputs);
     void backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets);
     void getResults(VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &results) const;
+    float getRecentAverageError() const {return m_recentAverageError;}
 
 private:
     VectorN<Layer, NUM_LAYERS> m_layers; // i.e. vector of vector [layer][neuronNum]

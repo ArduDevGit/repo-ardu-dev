@@ -24,7 +24,8 @@ Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topologyNumNeurons(to
 
         // Force last neuron for this iteration/layer to 1.0 - the bias neuron
         unsigned neuronsInLayer = topology[layerNum];
-        if (neuronsInLayer > 0) {
+        bool isOutputLayer = (layerNum == (NUM_LAYERS-1));
+        if (!isOutputLayer && neuronsInLayer > 0) {
             m_layers[layerNum][neuronsInLayer-1].setOutputVal(1.0);
         }
     }
@@ -67,13 +68,13 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
     Layer &outputLayer = m_layers[NUM_LAYERS-1];
     m_error = 0.0; // and accumulate overall net error
     // loop through output layer neurons only (not including bias)
-    for (unsigned neuron = 0; neuron < NUM_NEURONS_OUTPUT_LAYER - 1; ++neuron) {
+    for (unsigned neuron = 0; neuron < NUM_NEURONS_OUTPUT_LAYER; ++neuron) {
         float delta = targets[neuron] - outputLayer[neuron].getOutputVal();
         m_error += delta * delta; // sum of squares of errors
     }
 
     // get average error (divide by number of elements that we summed for the average)
-    m_error = m_error / (NUM_NEURONS_OUTPUT_LAYER - 1); // exclude bias neuron
+    m_error = m_error / (NUM_NEURONS_OUTPUT_LAYER); // exclude bias neuron
     m_error = std::sqrt(m_error);
 
     // debug: recent average measurement:
@@ -82,7 +83,7 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
 
     // calculate output layer gradients for each output neuron,
     // meaning compute how much that neuron contributed to the overall error.
-    for (unsigned neuron = 0; neuron < NUM_NEURONS_OUTPUT_LAYER - 1; ++neuron) {
+    for (unsigned neuron = 0; neuron < NUM_NEURONS_OUTPUT_LAYER; ++neuron) {
         outputLayer[neuron].calcOutputGradients(targets[neuron]);
     }
 
@@ -103,16 +104,22 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
         Layer &prevLayer = m_layers[layerNum-1];
         unsigned numActivePrevLayer = m_topologyNumNeurons[layerNum-1];
 
-        for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum] - 1; ++neuron) {
-                layer[neuron].updateInputWeights(prevLayer,numActivePrevLayer);
+        bool isOutputLayer = (layerNum == NUM_LAYERS - 1);
+        unsigned limit = isOutputLayer ?
+                         m_topologyNumNeurons[layerNum] :     // update ALL neurons
+                         m_topologyNumNeurons[layerNum] - 1;  // skip bias neuron
+
+        for (unsigned neuron = 0; neuron < limit; ++neuron) {
+            layer[neuron].updateInputWeights(prevLayer, numActivePrevLayer);
         }
     }
+
 
 }
 
 void Net::getResults(VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &results) const
 {
-    for (unsigned n = 0; n < NUM_NEURONS_OUTPUT_LAYER - 1; ++n) {
+    for (unsigned n = 0; n < NUM_NEURONS_OUTPUT_LAYER; ++n) {
         results[n] = m_layers[NUM_LAYERS-1][n].getOutputVal();
     }
 }
