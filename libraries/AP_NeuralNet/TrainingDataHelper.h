@@ -1,7 +1,3 @@
-//
-// Created by gs on 1/12/26.
-//
-
 #ifndef REPO_ARDU_DEV_TRAININGDATAHELPER_H
 #define REPO_ARDU_DEV_TRAININGDATAHELPER_H
 #pragma once
@@ -9,7 +5,9 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include <AP_Math/vectorN.h>
+
+#include "AP_Neural_Config.h"
 
 using namespace std;
 
@@ -17,13 +15,13 @@ using namespace std;
 class TrainingData
 {
 public:
-    TrainingData(const string filename);
+    TrainingData();
     bool isEof(void) { return m_trainingDataFile.eof(); }
     void getTopology(VectorN<unsigned,NUM_LAYERS>& topology);
 
     // Returns the number of input values read from the file:
-    unsigned getNextInputs(vector<double>& inputVals);
-    unsigned getTargetOutputs(vector<double>& targetOutputVals);
+    unsigned getNextInputs(VectorN<float,NUM_INPUTS> & inputVals);
+    unsigned getTargetOutputs(VectorN<float,NUM_NEURONS_OUTPUT_LAYER>& targetOutputVals);
 
 private:
     ifstream m_trainingDataFile;
