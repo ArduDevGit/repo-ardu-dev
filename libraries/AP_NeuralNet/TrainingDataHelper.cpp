@@ -75,7 +75,7 @@ unsigned TrainingData::getTargetOutputs(VectorN<float,NUM_NEURONS_OUTPUT_LAYER>&
     unsigned index = 0;
 
     if (label.compare("out:") == 0) {
-        double oneValue;
+        float oneValue;
         while (ss >> oneValue && index < NUM_NEURONS_OUTPUT_LAYER) {
             targetOutputVals[index] = oneValue;
             index++;
