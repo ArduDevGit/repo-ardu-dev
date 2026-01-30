@@ -35,7 +35,7 @@ Net::Net(const VectorN<unsigned,NUM_LAYERS> &topology) : m_topologyNumNeurons(to
     // init variables
     m_error = 0.0;
     m_recentAverageError = 0.0;
-    m_recentAverageSmoothingFactor = 0.0;
+    m_recentAverageSmoothingFactor = 100.0;
 
 }
 
@@ -93,9 +93,17 @@ void Net::backPropagate(const VectorN<float,NUM_NEURONS_OUTPUT_LAYER> &targets)
         Layer &nextHiddenLayer = m_layers[layerNum+1];
         unsigned numActiveNextLayer = m_topologyNumNeurons[layerNum+1];
 
+        // If the next layer has a bias neuron (i.e. it's not the output layer),
+        // exclude that bias from sumDOW. If it's the output layer, use all neurons.
+        bool nextIsOutputLayer = (layerNum + 1 == NUM_LAYERS - 1);
+        unsigned countForDOW = nextIsOutputLayer ?
+                               numActiveNextLayer :        // no bias in output layer
+                               numActiveNextLayer - 1;     // exclude bias in hidden layers
+
         for (unsigned neuron = 0; neuron < m_topologyNumNeurons[layerNum] - 1; ++neuron) {
-                currentHiddenLayer[neuron].calcHiddenGradient(nextHiddenLayer,numActiveNextLayer);
+            currentHiddenLayer[neuron].calcHiddenGradient(nextHiddenLayer, countForDOW);
         }
+
     }
 
     // for all layers from outputs to first hidden layer, update connection weights
